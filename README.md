@@ -1,2 +1,2 @@
-# go-rutracker  [![Build Status](https://travis-ci.org/ruslanfedoseenko/go-rutracker.svg?branch=master)](https://travis-ci.org/ruslanfedoseenko/go-rutracker)
+# gorutracker  [![Build Status](https://travis-ci.org/ruslanfedoseenko/gorutracker.svg?branch=master)](https://travis-ci.org/ruslanfedoseenko/gorutracker)
 api.rutracker.org client

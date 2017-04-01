@@ -1,4 +1,4 @@
-package go_rutracker
+package gorutracker
 
 
 type Client struct {
