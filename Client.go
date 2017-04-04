@@ -6,8 +6,8 @@ import (
 	"github.com/ruslanfedoseenko/gorutracker/internalModels"
 	"io/ioutil"
 	"github.com/ruslanfedoseenko/gorutracker/Misc"
-	"github.com/ruslanfedoseenko/gorutracker/Model"
 	"strconv"
+	"net/url"
 )
 
 type Client struct {
@@ -46,7 +46,8 @@ func (c *Client) GetBulkOperationsObjectsLimit() (limit int, err error) {
 
 }
 
-func (c *Client) GetStatuses() (statuses []Model.Status, err error) {
+func (c *Client) GetStatuses() (statuses map[int]string, err error) {
+	statuses = make(map[int]string)
 	if c.cache.Get("statuses", &statuses) == nil {
 		return
 	}
@@ -65,14 +66,112 @@ func (c *Client) GetStatuses() (statuses []Model.Status, err error) {
 		for k, v := range statusesDto.Result {
 			var tmp int
 			tmp, err = strconv.Atoi(k)
-
-			statuses = append(statuses, Model.Status{
-				Id: tmp,
-				Name: v,
-
-			})
+			if err != nil {
+				return nil,err
+			}
+			statuses[tmp] = v
 		}
 		c.cache.Put("statuses", &statuses)
 		return
 	}
 }
+
+
+func (c *Client) GetForumNames(ids []int) (forumNames map[int]string,err error){
+	forumNames = make(map[int]string)
+	var response *http.Response
+	var requestUrl *url.URL
+	requestUrl, err = requestUrl.Parse(c.apiUrl + "get_forum_name")
+	query := requestUrl.Query()
+	query.Add("by", "forum_id")
+	query.Add("val", Misc.ArrayToString(Misc.ToInterfaceSlice(ids)))
+	requestUrl.RawQuery = query.Encode()
+	response, err = http.Get(requestUrl.String())
+
+	if err == nil {
+		defer response.Body.Close()
+		var forumNamesDto internalModels.KeyValueDto
+		buffer, _ := ioutil.ReadAll(response.Body)
+		err = json.Unmarshal(buffer, &forumNamesDto)
+		if err != nil {
+			return
+		}
+		for k, v := range forumNamesDto.Result {
+			var tmp int
+			tmp, err = strconv.Atoi(k)
+			if err != nil {
+				return nil,err
+			}
+			forumNames[tmp] = v
+		}
+		return
+	}
+
+	return
+}
+
+
+func (c *Client) GetForumData(ids []int) (forumData map[int]internalModels.ForumData,err error) {
+	forumData = make(map[int]internalModels.ForumData)
+	var response *http.Response
+	var requestUrl *url.URL
+	requestUrl, err = requestUrl.Parse(c.apiUrl + "get_forum_data")
+	query := requestUrl.Query()
+	query.Add("by", "forum_id")
+	query.Add("val", Misc.ArrayToString(Misc.ToInterfaceSlice(ids)))
+	requestUrl.RawQuery = query.Encode()
+	response, err = http.Get(requestUrl.String())
+
+	if err == nil {
+		defer response.Body.Close()
+		var forumDatasDto internalModels.ForumDataDto
+		buffer, _ := ioutil.ReadAll(response.Body)
+		err = json.Unmarshal(buffer, &forumDatasDto)
+		if err != nil {
+			return
+		}
+		for k, v := range forumDatasDto.Result {
+			var tmp int
+			tmp, err = strconv.Atoi(k)
+			if err != nil {
+				return nil,err
+			}
+			forumData[tmp] = v
+		}
+		return
+	}
+	return
+}
+
+func (c *Client) GetUserName(ids []int) (userNames map[int]string,err error) {
+	userNames = make(map[int]string)
+	var response *http.Response
+	var requestUrl *url.URL
+	requestUrl, err = requestUrl.Parse(c.apiUrl + "get_user_name")
+	query := requestUrl.Query()
+	query.Add("by", "user_id")
+	query.Add("val", Misc.ArrayToString(Misc.ToInterfaceSlice(ids)))
+	requestUrl.RawQuery = query.Encode()
+	response, err = http.Get(requestUrl.String())
+
+	if err == nil {
+		defer response.Body.Close()
+		var forumNamesDto internalModels.KeyValueDto
+		buffer, _ := ioutil.ReadAll(response.Body)
+		err = json.Unmarshal(buffer, &forumNamesDto)
+		if err != nil {
+			return
+		}
+		for k, v := range forumNamesDto.Result {
+			var tmp int
+			tmp, err = strconv.Atoi(k)
+			if err != nil {
+				return nil,err
+			}
+			userNames[tmp] = v
+		}
+		return
+	}
+	return
+}
+
