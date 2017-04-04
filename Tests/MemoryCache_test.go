@@ -14,4 +14,5 @@ func TestAssignDifferentTypes(t *testing.T)  {
 	if err == nil{
 		t.Error("Type conversions are not allowed")
 	}
+
 }
