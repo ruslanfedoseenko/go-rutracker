@@ -77,6 +77,32 @@ func (c *Client) GetStatuses() (statuses map[int]string, err error) {
 }
 
 
+func (c *Client) GetForums() (forumsList map[string]string, err error){
+	forumsList = make(map[string]string)
+	if c.cache.Get("forums_list", &forumsList) == nil {
+		return
+	}
+	var response *http.Response
+	var requestUrl *url.URL
+	requestUrl, err = requestUrl.Parse(c.apiUrl + "/static/cat_forum_tree")
+	response, err = http.Get(requestUrl.String())
+	if err == nil {
+		defer  response.Body.Close()
+		var forumTree internalModels.ForumTreeDto
+		var buffer []byte
+		buffer, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			return
+		}
+		err = json.Unmarshal(buffer, &forumTree)
+		c.cache.Put("forum_list", forumTree.Result.Forums)
+		c.cache.Put("category_list", forumTree.Result.Categories)
+		c.cache.Put("forum_tree", forumTree.Result.Tree)
+		forumsList = forumTree.Result.Forums
+	}
+	return
+}
+
 func (c *Client) GetForumNames(ids []int) (forumNames map[int]string,err error){
 	forumNames = make(map[int]string)
 	var response *http.Response
